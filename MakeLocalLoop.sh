@@ -1,4 +1,11 @@
 #!/bin/bash
+#
+# Program  : MakeLocalLoop.sh
+# Author   : Brian Mork ("Hermit")
+# Date     : 2019-06-18
+# Contact  : https://blog.stackattack.net
+# WhatItDo : Creates a local loop that binds a listener on the local machine
+#            to a specified port on a remote machine using SSH as the handling agent
 
 if [ $# -ne 4 ]; then
 	echo "Syntax: MakeLocalLoop.sh [LOCALPORT] [REMOTE_SYSTEM] [REMOTE_PORT] [LOCALUSER]"
