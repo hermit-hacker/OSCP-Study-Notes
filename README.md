@@ -9,4 +9,8 @@ Clones of websites, git repositories, personally created scripts, common referen
 # What you WON'T find
 Anything specific to the OSCP or PWK labs.  Like, anything.  I kept all of that in a separate folder structure.  Also, you won't find any notes on things I already felt extremely comfortable with (e.g. the BOF) since there didn't seem to be much point in wasting valuable time documenting things I already knew... except in those cases where it was part of some other source, and I just kept it because it would have been longer to remove it.
 
+# Credit Where It's Due
+If your content is here and I haven't clearly called it out in the directories or files themselves, please let me know and I'll explicitly give you credit in this readme.  Thanks!
+
 # Good hunting!
+]-[ermit
