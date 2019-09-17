@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<!-- saved from url=(0055)https://blog.ropnop.com/practical-usage-of-ntlm-hashes/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Practical Usage of NTLM Hashes</title>
+<meta name="description" content="I&#39;ve shown all the different ways to own a Windows environment when you have a password - but having a hash is just as good! Don&#39;t bother cracking - PTH!">
+<meta name="HandheldFriendly" content="True">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="apple-touch-icon" sizes="57x57" href="https://blog.ropnop.com/assets/img/favicons/apple-touch-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="https://blog.ropnop.com/assets/img/favicons/apple-touch-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="https://blog.ropnop.com/assets/img/favicons/apple-touch-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="https://blog.ropnop.com/assets/img/favicons/apple-touch-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="https://blog.ropnop.com/assets/img/favicons/apple-touch-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="https://blog.ropnop.com/assets/img/favicons/apple-touch-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="https://blog.ropnop.com/assets/img/favicons/apple-touch-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="https://blog.ropnop.com/assets/img/favicons/apple-touch-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://blog.ropnop.com/assets/img/favicons/apple-touch-icon-180x180.png">
+<link rel="icon" type="image/png" href="https://blog.ropnop.com/assets/img/favicons/favicon-32x32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="https://blog.ropnop.com/assets/img/favicons/android-chrome-192x192.png" sizes="192x192">
+<link rel="icon" type="image/png" href="https://blog.ropnop.com/assets/img/favicons/favicon-96x96.png" sizes="96x96">
+<link rel="icon" type="image/png" href="https://blog.ropnop.com/assets/img/favicons/favicon-16x16.png" sizes="16x16">
+<link rel="manifest" href="https://blog.ropnop.com/assets/img/favicons/manifest.json">
+<link rel="mask-icon" href="https://blog.ropnop.com/assets/img/favicons/safari-pinned-tab.svg" color="#5bbad5">
+<link rel="shortcut icon" href="https://blog.ropnop.com/assets/img/favicons/favicon.ico">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="msapplication-TileImage" content="/assets/img/favicons/mstile-144x144.png">
+<meta name="msapplication-config" content="/assets/img/favicons/browserconfig.xml">
+<meta name="theme-color" content="#ffffff">
+<link rel="stylesheet" type="text/css" href="./Practical Usage of NTLM Hashes_files/screen.css">
+<link rel="stylesheet" type="text/css" href="./Practical Usage of NTLM Hashes_files/custom.css">
+<link rel="stylesheet" type="text/css" href="./Practical Usage of NTLM Hashes_files/css">
+<link rel="stylesheet" href="./Practical Usage of NTLM Hashes_files/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="./Practical Usage of NTLM Hashes_files/prism.css">
+<link rel="stylesheet" type="text/css" href="./Practical Usage of NTLM Hashes_files/rrssb.css">
+<link rel="canonical" href="https://blog.ropnop.com/practical-usage-of-ntlm-hashes/">
+<meta name="referrer" content="origin-when-cross-origin">
+<meta property="og:site_name" content="ropnop blog">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Practical Usage of NTLM Hashes">
+<meta property="og:description" content="I&#39;ve shown all the different ways to own a Windows environment when you have a password - but having a hash is just as good! Don&#39;t bother cracking - PTH!">
+<meta property="og:url" content="https://blog.ropnop.com/practical-usage-of-ntlm-hashes/">
+<meta property="og:image" content="https://blog.ropnop.com/content/images/2016/06/you_shall_not_pth-1.jpg">
+<meta property="article:published_time" content="2016-06-06T00:50:16.000Z">
+<meta property="article:modified_time" content="2016-06-06T00:50:16.000Z">
+<meta property="article:tag" content="pth">
+<meta property="article:tag" content="mimikatz">
+<meta property="article:tag" content="windows">
+<meta property="article:tag" content="linux">
+<meta property="article:tag" content="impacket">
+<meta property="article:tag" content="crackmapexec">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Practical Usage of NTLM Hashes">
+<meta name="twitter:description" content="I&#39;ve shown all the different ways to own a Windows environment when you have a password - but having a hash is just as good! Don&#39;t bother cracking - PTH!">
+<meta name="twitter:url" content="https://blog.ropnop.com/practical-usage-of-ntlm-hashes/">
+<meta name="twitter:image" content="https://blog.ropnop.com/content/images/2016/06/you_shall_not_pth-1.jpg">
+<meta name="twitter:label1" content="Written by">
+<meta name="twitter:data1" content="ropnop">
+<meta name="twitter:label2" content="Filed under">
+<meta name="twitter:data2" content="pth, mimikatz, windows, linux, impacket, crackmapexec">
+<meta name="twitter:site" content="@ropnop">
+<script async="" src="./Practical Usage of NTLM Hashes_files/analytics.js.download"></script><script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "ropnop blog",
+        "logo": "https://blog.ropnop.com/content/images/2016/04/Daltrey-tommy-banner.jpg"
+    },
+    "author": {
+        "@type": "Person",
+        "name": "ropnop",
+        "url": "https://blog.ropnop.com/author/ropnop/",
+        "sameAs": []
+    },
+    "headline": "Practical Usage of NTLM Hashes",
+    "url": "https://blog.ropnop.com/practical-usage-of-ntlm-hashes/",
+    "datePublished": "2016-06-06T00:50:16.000Z",
+    "dateModified": "2016-06-06T00:50:16.000Z",
+    "image": "https://blog.ropnop.com/content/images/2016/06/you_shall_not_pth-1.jpg",
+    "keywords": "pth, mimikatz, windows, linux, impacket, crackmapexec",
+    "description": "I&#x27;ve shown all the different ways to own a Windows environment when you have a password - but having a hash is just as good! Don&#x27;t bother cracking - PTH!"
+}
+    </script>
+<meta name="generator" content="Ghost 0.9">
+<link rel="alternate" type="application/rss+xml" title="ropnop blog" href="https://blog.ropnop.com/rss/">
+<script>
+// to enable Google Analytics
+var ga_id = 'UA-76398957-1';
+
+// to enable Disqus
+var disqus_shortname = 'ropnopblog'
+
+
+// to enable Social Link Icons add the social_link object
+// with the pair key/value -> social_network/link
+// NB: the key is used to include the right icon from Font Awesome
+// (you can include any Font Awesome icon)
+
+// Example2: squared social network icons
+var social_link = {
+    'twitter-square': 'https://twitter.com/ropnop',
+    'github-square': 'https://github.com/ropnop',
+    'rss':'https://blog.ropnop.com/rss/'
+    // you can add more icons
+}
+
+</script>
+<script type="text/javascript" async="" src="./Practical Usage of NTLM Hashes_files/embed.js.download"></script><style id="fit-vids-style">.fluid-width-video-wrapper{width:100%;position:relative;padding:0;}.fluid-width-video-wrapper iframe,.fluid-width-video-wrapper object,.fluid-width-video-wrapper embed {position:absolute;top:0;left:0;width:100%;height:100%;}</style><link rel="preload" as="style" href="https://c.disquscdn.com/next/embed/styles/lounge.4ca2b8f5ce995b1916c0f691daf84b8d.css"><link rel="preload" as="script" href="https://c.disquscdn.com/next/embed/common.bundle.7306fbb45608972e37b2d3948bc46a0b.js"><link rel="preload" as="script" href="https://c.disquscdn.com/next/embed/lounge.bundle.7058e17267f603781c1369bbd2dd1e80.js"><link rel="preload" as="script" href="https://disqus.com/next/config.js"></head>
+<body class="post-template tag-pth tag-mimikatz tag-windows tag-linux tag-impacket tag-crackmapexec">
+<div class="site-wrapper">
+<header class="main-header post-head no-cover">
+<nav class="main-nav  clearfix">
+<a class="back-button icon-arrow-left" href="https://blog.ropnop.com/"> Home</a>
+<a class="subscribe-button icon-feed" href="https://blog.ropnop.com/rss/"> Subscribe</a>
+</nav>
+</header>
+<main class="content" role="main">
+<article class="post tag-pth tag-mimikatz tag-windows tag-linux tag-impacket tag-crackmapexec">
+<header class="post-header">
+<h1 class="post-title">Practical Usage of NTLM Hashes</h1>
+<section class="post-meta">
+<time class="post-date" datetime="2016-06-06">06 June 2016</time> on <a href="https://blog.ropnop.com/tag/pth/">pth</a>, <a href="https://blog.ropnop.com/tag/mimikatz/">mimikatz</a>, <a href="https://blog.ropnop.com/tag/windows/">windows</a>, <a href="https://blog.ropnop.com/tag/linux/">linux</a>, <a href="https://blog.ropnop.com/tag/impacket/">impacket</a>, <a href="https://blog.ropnop.com/tag/crackmapexec/">crackmapexec</a>
+</section>
+<section class="social-share">
+<ul class="rrssb-buttons clearfix rrssb-1 large-format" style="font-size: 19.4167px;">
+<li class="rrssb-email" data-initwidth="33.333333333333336" data-size="38" style="width: 33.3333%;">
+
+<a href="mailto:?subject=Practical%20Usage%20of%20NTLM%20Hashes&amp;body=Practical%20Usage%20of%20NTLM%20Hashes%0A%0Ahttps%3A%2F%2Fblog.ropnop.com%2Fpractical-usage-of-ntlm-hashes%2F">
+<span class="rrssb-icon">
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+<path d="M20.11 26.147c-2.335 1.05-4.36 1.4-7.124 1.4C6.524 27.548.84 22.916.84 15.284.84 7.343 6.602.45 15.4.45c6.854 0 11.8 4.7 11.8 11.252 0 5.684-3.193 9.265-7.398 9.3-1.83 0-3.153-.934-3.347-2.997h-.077c-1.208 1.986-2.96 2.997-5.023 2.997-2.532 0-4.36-1.868-4.36-5.062 0-4.75 3.503-9.07 9.11-9.07 1.713 0 3.7.4 4.6.972l-1.17 7.203c-.387 2.298-.115 3.3 1 3.4 1.674 0 3.774-2.102 3.774-6.58 0-5.06-3.27-8.994-9.304-8.994C9.05 2.87 3.83 7.545 3.83 14.97c0 6.5 4.2 10.2 10 10.202 1.987 0 4.09-.43 5.647-1.245l.634 2.22zM16.647 10.1c-.31-.078-.7-.155-1.207-.155-2.572 0-4.596 2.53-4.596 5.53 0 1.5.7 2.4 1.9 2.4 1.44 0 2.96-1.83 3.31-4.088l.592-3.72z"></path>
+</svg>
+</span>
+<span class="rrssb-text">email</span>
+</a>
+</li>
+<li class="rrssb-twitter" data-initwidth="33.333333333333336" data-size="54" style="width: 33.3333%;">
+
+<a href="https://twitter.com/intent/tweet?text=Practical%20Usage%20of%20NTLM%20Hashes%20https%3A%2F%2Fblog.ropnop.com%2Fpractical-usage-of-ntlm-hashes%2F" class="popup">
+<span class="rrssb-icon">
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+<path d="M24.253 8.756C24.69 17.08 18.297 24.182 9.97 24.62c-3.122.162-6.22-.646-8.86-2.32 2.702.18 5.375-.648 7.507-2.32-2.072-.248-3.818-1.662-4.49-3.64.802.13 1.62.077 2.4-.154-2.482-.466-4.312-2.586-4.412-5.11.688.276 1.426.408 2.168.387-2.135-1.65-2.73-4.62-1.394-6.965C5.574 7.816 9.54 9.84 13.802 10.07c-.842-2.738.694-5.64 3.434-6.48 2.018-.624 4.212.043 5.546 1.682 1.186-.213 2.318-.662 3.33-1.317-.386 1.256-1.248 2.312-2.4 2.942 1.048-.106 2.07-.394 3.02-.85-.458 1.182-1.343 2.15-2.48 2.71z"></path>
+</svg>
+</span>
+<span class="rrssb-text">twitter</span>
+</a>
+</li>
+<li class="rrssb-reddit" data-initwidth="33.333333333333336" data-size="45" style="width: 33.3333%;">
+<a href="http://www.reddit.com/submit?url=https%3A%2F%2Fblog.ropnop.com%2Fpractical-usage-of-ntlm-hashes%2F&amp;text=Practical%20Usage%20of%20NTLM%20Hashes&amp;title=Practical%20Usage%20of%20NTLM%20Hashes">
+<span class="rrssb-icon">
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+<path d="M11.794 15.316c0-1.03-.835-1.895-1.866-1.895-1.03 0-1.893.866-1.893 1.896s.863 1.9 1.9 1.9c1.023-.016 1.865-.916 1.865-1.9zM18.1 13.422c-1.03 0-1.895.864-1.895 1.895 0 1 .9 1.9 1.9 1.865 1.03 0 1.87-.836 1.87-1.865-.006-1.017-.875-1.917-1.875-1.895zM17.527 19.79c-.678.68-1.826 1.007-3.514 1.007h-.03c-1.686 0-2.834-.328-3.51-1.005-.264-.265-.693-.265-.958 0-.264.265-.264.7 0 1 .943.9 2.4 1.4 4.5 1.402.005 0 0 0 0 0 .005 0 0 0 0 0 2.066 0 3.527-.46 4.47-1.402.265-.264.265-.693.002-.958-.267-.334-.688-.334-.988-.043z"></path>
+<path d="M27.707 13.267c0-1.785-1.453-3.237-3.236-3.237-.792 0-1.517.287-2.08.76-2.04-1.294-4.647-2.068-7.44-2.218l1.484-4.69 4.062.955c.07 1.4 1.3 2.6 2.7 2.555 1.488 0 2.695-1.208 2.695-2.695C25.88 3.2 24.7 2 23.2 2c-1.06 0-1.98.616-2.42 1.508l-4.633-1.09c-.344-.082-.693.117-.803.454l-1.793 5.7C10.55 8.6 7.7 9.4 5.6 10.75c-.594-.45-1.3-.75-2.1-.72-1.785 0-3.237 1.45-3.237 3.2 0 1.1.6 2.1 1.4 2.69-.04.27-.06.55-.06.83 0 2.3 1.3 4.4 3.7 5.9 2.298 1.5 5.3 2.3 8.6 2.325 3.227 0 6.27-.825 8.57-2.325 2.387-1.56 3.7-3.66 3.7-5.917 0-.26-.016-.514-.05-.768.965-.465 1.577-1.565 1.577-2.698zm-4.52-9.912c.74 0 1.3.6 1.3 1.3 0 .738-.6 1.34-1.34 1.34s-1.343-.602-1.343-1.34c.04-.655.596-1.255 1.396-1.3zM1.646 13.3c0-1.038.845-1.882 1.883-1.882.31 0 .6.1.9.21-1.05.867-1.813 1.86-2.26 2.9-.338-.328-.57-.728-.57-1.26zm20.126 8.27c-2.082 1.357-4.863 2.105-7.83 2.105-2.968 0-5.748-.748-7.83-2.105-1.99-1.3-3.087-3-3.087-4.782 0-1.784 1.097-3.484 3.088-4.784 2.08-1.358 4.86-2.106 7.828-2.106 2.967 0 5.7.7 7.8 2.106 1.99 1.3 3.1 3 3.1 4.784C24.86 18.6 23.8 20.3 21.8 21.57zm4.014-6.97c-.432-1.084-1.19-2.095-2.244-2.977.273-.156.59-.245.928-.245 1.036 0 1.9.8 1.9 1.9-.016.522-.27 1.022-.57 1.327z"></path>
+</svg>
+</span>
+<span class="rrssb-text">reddit</span>
+</a>
+</li>
+</ul>
+</section>
+</header>
+<section class="post-content">
+<h3 id="tableofcontents">Table of Contents</h3>
+<li><a href="https://blog.ropnop.com/practical-usage-of-ntlm-hashes/#longlivepth">Long live PTH</a></li> <ul> <li><a href="https://blog.ropnop.com/practical-usage-of-ntlm-hashes/#testingloginswithhashes">Testing Logins with Hashes</a></li> <li><a href="https://blog.ropnop.com/practical-usage-of-ntlm-hashes/#pthtoolkitandimpacket">pth-toolkit and Impacket</a></li> <li><a href="https://blog.ropnop.com/practical-usage-of-ntlm-hashes/#usinghasheswithwindows">Using Hashes with Windows</a></li> <ul> <li><a href="https://blog.ropnop.com/practical-usage-of-ntlm-hashes/#pthwithmimikatz">PTH with Mimikatz</a></li> </ul> </ul> <li><a href="https://blog.ropnop.com/practical-usage-of-ntlm-hashes/#comingup">Coming Up</a></li>
+<br>
+<p>In my <a href="https://blog.ropnop.com/using-credentials-to-own-windows-boxes/">last series</a>, I discussed various ways of getting command execution in Windows environments when you've compromised a valid set of domain credentials.</p>
+<p>In this post, I wanted to walk through some ways you can achieve the same results without ever actually needing a password. </p>
+<h1 id="longlivepth">Long live PTH</h1>
+<p>Pass-the-hash has been around a long time, and although Microsoft has taken steps to prevent the classic PTH attacks, <a href="http://www.harmj0y.net/blog/penetesting/pass-the-hash-is-dead-long-live-pass-the-hash/">it still remains</a>.</p>
+<p>I'm not going to go into all the different ways you could recover a hash, but it's important to note the difference in certain types of hashes. In <a href="https://blog.ropnop.com/using-credentials-to-own-windows-boxes/">Part 1</a>, I talked briefly about recovering a domain account hash using Responder. The recovered password hash is in the format "NetNTLMv2", which basically means it's a "salted" NTLM hash. (I say salted because it's a little easier to understand, but really it's a hashed response to a challenge). This type of hash <em>can not</em> be used with PTH. If you've recovered one of these hashes, all you can really hope for is to crack it offline or try to capture it again and perform an SMB relay attack (a topic for another post).</p>
+<p>The types of hashes you <em>can</em> use with PTH are NT or NTLM hashes. To get one of these hashes, you're probably gonna have to exploit a system through some other means and wind up with SYSTEM privs. Then you can dump local SAM hashes through Meterpreter, Empire, or some other tool. Mimikatz will also output the NT hashes of logged in users.</p>
+<p>For this scenario, we'll assume I compromised a machine through some exploit, got an Empire agent, ran Mimikatz and recovered some NT hashes of valid domain users:</p>
+<p><img src="./Practical Usage of NTLM Hashes_files/empire_hashes.png" alt="Empire compromised hashes"></p>
+<p>We now have NT hashes for two domain users: kbryant, and jhoyer.</p>
+<h2 id="testingloginswithhashes">Testing Logins with Hashes</h2>
+<p>CrackMapExec has become my go-to tool for quickly pentesting a Windows environment. I used it in an earlier post to test credentials across a network, but it also supports authenticating via PTH with NT hashes as well. To see if the "kbryant" hash can be used to authenticate anywhere on the network, use the <code>-H</code> option:</p>
+<p><img src="./Practical Usage of NTLM Hashes_files/crackmap_hashes.png" alt="CrackMapExec with a hash"></p>
+<p>It works and we authenticate as him and see that he's an admin on two different workstations.</p>
+<p>Metasploit's <code>smb_login</code> can also be used with hashes to test credentials and see if a user is an Administrator. Metasploit requires the full NTLM hash, however, so you have to add the "blank" LM portion to the beginning: <code>aad3b435b51404eeaad3b435b51404ee</code>.</p>
+<p><img src="./Practical Usage of NTLM Hashes_files/metasploit_hashes.png" alt="Metasploit smb_login with hashes"></p>
+<h2 id="pthtoolkitandimpacket">pth-toolkit and Impacket</h2>
+<p>Pretty much all of the tools I outlined in <a href="https://blog.ropnop.com/using-credentials-to-own-windows-boxes/">Part 1</a> can be used with NT hashes instead of passwords. </p>
+<p>The "pth" suite contains a bunch of programs that have been patched to support authenticating with patches: </p>
+<pre class=" language-pth"><code class="-curl language-pth">pth-net  
+pth-rpcclient  
+pth-smbclient  
+pth-smbget  
+pth-sqsh  
+pth-winexe  
+pth-wmic  
+pth-wmis  
+</code></pre>
+<p>More info at the Github page <a href="https://github.com/byt3bl33d3r/pth-toolkit">here</a>. <em>(sidenote: ha! i just noticed it's the same author as CrackMapExec. nice)</em></p>
+<p>I won't go into the tools again since they're the same, we're just using a Hash instead of a plaintext password now.</p>
+<p><strong>pth-winexe</strong>. The pth suite uses the format DOMAIN/user%hash:
+<img src="./Practical Usage of NTLM Hashes_files/pth-winexe.png" alt="pth-winexe"></p>
+<p><strong>Impacket</strong>. All the Impacket examples support hashes. If you don't want to include the blank LM portion, just prepend a leading colon:
+<img src="./Practical Usage of NTLM Hashes_files/wmiexec_hashes.png" alt="wmiexec hashes"></p>
+<h2 id="usinghasheswithwindows">Using Hashes with Windows</h2>
+<p>From within Windows, the two main tools to use with hashes are Impacket and Mimikatz.</p>
+<p>I just found out recently that a researcher compiled all the Impacket examples to standalone Windows executables. If you can pull down the binaries onto your Windows system, you have all the amazing functionality of Impacket's examples from a Windows command prompt. Download the executables from here:</p>
+<p><a href="https://github.com/maaaaz/impacket-examples-windows">https://github.com/maaaaz/impacket-examples-windows</a></p>
+<p>From my Windows attack box, I now have the same functionality as above:</p>
+<p><img src="./Practical Usage of NTLM Hashes_files/windows_wmiexec.png" alt="Windows wmiexec with hashes"></p>
+<p>Pretty slick.</p>
+<h3 id="pthwithmimikatz">PTH with Mimikatz</h3>
+<p>If you don't know already, Mimikatz is so much more than just a tool to dump passwords from LSASS memory. It has PTH functionality builtin and can be used with a hash to essentially "runas" another process.</p>
+<p>From within a command prompt (or PowerShell if you're using Invoke-Mimikatz), run the <code>sekurlsa::pth</code> module and specify the user, domain and NTLM hash. This will pop open another cmd prompt as if you just successfully did a "runas" with the kbryant user.</p>
+<p><img src="./Practical Usage of NTLM Hashes_files/mimikatz_pth.jpg" alt="Using mimikatz to PTH"></p>
+<p>We ran the <code>pth</code> module and a new command prompt opened up. We got a TGT for the "kbryant" user and can now run any Windows command as him.</p>
+<h1 id="comingup">Coming Up</h1>
+<p>This was just a quick post showing that an NTLM hash is pretty much just as good as a password when it comes to security tools. If you compromise a hash, all the same tools and techniques are still valid and you can authenticate as that user to browse file shares and execute commands.</p>
+<p>In my next post, I'm going to show how you can also do these techniques with compromised or forged kerberos tickets. Everyone hears about the dreaded "Golden Ticket" but I haven't really found much out there about the practical ways to use one if you have it. I'll dive into to generating a golden ticket and then using Linux and Windows tools to authenticate with it.</p>
+<p>Lemme know if there's any tool or technique I missed or you want me to dive into more!</p>
+<p>-ropnop</p>
+</section>
+<section class="social-share">
+<ul class="rrssb-buttons clearfix rrssb-2 large-format" style="font-size: 19.4167px;">
+<li class="rrssb-email" data-initwidth="33.333333333333336" data-size="38" style="width: 33.3333%;">
+
+<a href="mailto:?subject=Practical%20Usage%20of%20NTLM%20Hashes&amp;body=Practical%20Usage%20of%20NTLM%20Hashes%0A%0Ahttps%3A%2F%2Fblog.ropnop.com%2Fpractical-usage-of-ntlm-hashes%2F">
+<span class="rrssb-icon">
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+<path d="M20.11 26.147c-2.335 1.05-4.36 1.4-7.124 1.4C6.524 27.548.84 22.916.84 15.284.84 7.343 6.602.45 15.4.45c6.854 0 11.8 4.7 11.8 11.252 0 5.684-3.193 9.265-7.398 9.3-1.83 0-3.153-.934-3.347-2.997h-.077c-1.208 1.986-2.96 2.997-5.023 2.997-2.532 0-4.36-1.868-4.36-5.062 0-4.75 3.503-9.07 9.11-9.07 1.713 0 3.7.4 4.6.972l-1.17 7.203c-.387 2.298-.115 3.3 1 3.4 1.674 0 3.774-2.102 3.774-6.58 0-5.06-3.27-8.994-9.304-8.994C9.05 2.87 3.83 7.545 3.83 14.97c0 6.5 4.2 10.2 10 10.202 1.987 0 4.09-.43 5.647-1.245l.634 2.22zM16.647 10.1c-.31-.078-.7-.155-1.207-.155-2.572 0-4.596 2.53-4.596 5.53 0 1.5.7 2.4 1.9 2.4 1.44 0 2.96-1.83 3.31-4.088l.592-3.72z"></path>
+</svg>
+</span>
+<span class="rrssb-text">email</span>
+</a>
+</li>
+<li class="rrssb-twitter" data-initwidth="33.333333333333336" data-size="54" style="width: 33.3333%;">
+
+<a href="https://twitter.com/intent/tweet?text=Practical%20Usage%20of%20NTLM%20Hashes%20https%3A%2F%2Fblog.ropnop.com%2Fpractical-usage-of-ntlm-hashes%2F" class="popup">
+<span class="rrssb-icon">
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+<path d="M24.253 8.756C24.69 17.08 18.297 24.182 9.97 24.62c-3.122.162-6.22-.646-8.86-2.32 2.702.18 5.375-.648 7.507-2.32-2.072-.248-3.818-1.662-4.49-3.64.802.13 1.62.077 2.4-.154-2.482-.466-4.312-2.586-4.412-5.11.688.276 1.426.408 2.168.387-2.135-1.65-2.73-4.62-1.394-6.965C5.574 7.816 9.54 9.84 13.802 10.07c-.842-2.738.694-5.64 3.434-6.48 2.018-.624 4.212.043 5.546 1.682 1.186-.213 2.318-.662 3.33-1.317-.386 1.256-1.248 2.312-2.4 2.942 1.048-.106 2.07-.394 3.02-.85-.458 1.182-1.343 2.15-2.48 2.71z"></path>
+</svg>
+</span>
+<span class="rrssb-text">twitter</span>
+</a>
+</li>
+<li class="rrssb-reddit" data-initwidth="33.333333333333336" data-size="45" style="width: 33.3333%;">
+<a href="http://www.reddit.com/submit?url=https%3A%2F%2Fblog.ropnop.com%2Fpractical-usage-of-ntlm-hashes%2F&amp;text=Practical%20Usage%20of%20NTLM%20Hashes&amp;title=Practical%20Usage%20of%20NTLM%20Hashes">
+<span class="rrssb-icon">
+<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 28 28">
+<path d="M11.794 15.316c0-1.03-.835-1.895-1.866-1.895-1.03 0-1.893.866-1.893 1.896s.863 1.9 1.9 1.9c1.023-.016 1.865-.916 1.865-1.9zM18.1 13.422c-1.03 0-1.895.864-1.895 1.895 0 1 .9 1.9 1.9 1.865 1.03 0 1.87-.836 1.87-1.865-.006-1.017-.875-1.917-1.875-1.895zM17.527 19.79c-.678.68-1.826 1.007-3.514 1.007h-.03c-1.686 0-2.834-.328-3.51-1.005-.264-.265-.693-.265-.958 0-.264.265-.264.7 0 1 .943.9 2.4 1.4 4.5 1.402.005 0 0 0 0 0 .005 0 0 0 0 0 2.066 0 3.527-.46 4.47-1.402.265-.264.265-.693.002-.958-.267-.334-.688-.334-.988-.043z"></path>
+<path d="M27.707 13.267c0-1.785-1.453-3.237-3.236-3.237-.792 0-1.517.287-2.08.76-2.04-1.294-4.647-2.068-7.44-2.218l1.484-4.69 4.062.955c.07 1.4 1.3 2.6 2.7 2.555 1.488 0 2.695-1.208 2.695-2.695C25.88 3.2 24.7 2 23.2 2c-1.06 0-1.98.616-2.42 1.508l-4.633-1.09c-.344-.082-.693.117-.803.454l-1.793 5.7C10.55 8.6 7.7 9.4 5.6 10.75c-.594-.45-1.3-.75-2.1-.72-1.785 0-3.237 1.45-3.237 3.2 0 1.1.6 2.1 1.4 2.69-.04.27-.06.55-.06.83 0 2.3 1.3 4.4 3.7 5.9 2.298 1.5 5.3 2.3 8.6 2.325 3.227 0 6.27-.825 8.57-2.325 2.387-1.56 3.7-3.66 3.7-5.917 0-.26-.016-.514-.05-.768.965-.465 1.577-1.565 1.577-2.698zm-4.52-9.912c.74 0 1.3.6 1.3 1.3 0 .738-.6 1.34-1.34 1.34s-1.343-.602-1.343-1.34c.04-.655.596-1.255 1.396-1.3zM1.646 13.3c0-1.038.845-1.882 1.883-1.882.31 0 .6.1.9.21-1.05.867-1.813 1.86-2.26 2.9-.338-.328-.57-.728-.57-1.26zm20.126 8.27c-2.082 1.357-4.863 2.105-7.83 2.105-2.968 0-5.748-.748-7.83-2.105-1.99-1.3-3.087-3-3.087-4.782 0-1.784 1.097-3.484 3.088-4.784 2.08-1.358 4.86-2.106 7.828-2.106 2.967 0 5.7.7 7.8 2.106 1.99 1.3 3.1 3 3.1 4.784C24.86 18.6 23.8 20.3 21.8 21.57zm4.014-6.97c-.432-1.084-1.19-2.095-2.244-2.977.273-.156.59-.245.928-.245 1.036 0 1.9.8 1.9 1.9-.016.522-.27 1.022-.57 1.327z"></path>
+</svg>
+</span>
+<span class="rrssb-text">reddit</span>
+</a>
+</li>
+</ul>
+</section>
+<footer class="post-footer">
+<section class="author">
+<h4><a href="https://blog.ropnop.com/author/ropnop/">ropnop</a></h4>
+<p>Read <a href="https://blog.ropnop.com/author/ropnop/">more posts</a> by this author.</p>
+<div class="author-meta">
+</div>
+</section>
+<section class="post-comments">
+<div id="disqus_thread"><iframe id="dsq-app3700" name="dsq-app3700" allowtransparency="true" frameborder="0" scrolling="no" tabindex="0" title="Disqus" sandbox="allow-forms allow-popups allow-same-origin allow-scripts" width="100%" src="./Practical Usage of NTLM Hashes_files/saved_resource.html" style="width: 1px !important; min-width: 100% !important; border: none !important; overflow: hidden !important; height: 0px !important; display: none !important;" hidden=""></iframe><iframe id="dsq-app3697" name="dsq-app3697" allowtransparency="true" frameborder="0" scrolling="no" tabindex="0" title="Disqus" width="100%" src="./Practical Usage of NTLM Hashes_files/saved_resource(1).html" style="width: 1px !important; min-width: 100% !important; border: none !important; overflow: hidden !important; height: 390px !important;" horizontalscrolling="no" verticalscrolling="no"></iframe></div>
+<script type="text/javascript">
+              // required: replace example with your forum shortname
+              if(disqus_shortname && typeof disqus_shortname === "string") {
+                  var disqus_identifier = '';
+
+                  /* * * DON'T EDIT BELOW THIS LINE * * */
+                  (function() {
+                  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                  })();
+              }
+              </script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</section>
+</footer>
+</article>
+</main>
+<aside class="read-next">
+<a class="read-next-story no-cover" href="https://blog.ropnop.com/transferring-files-from-kali-to-windows/">
+<section class="post">
+<h2>Transferring Files from Linux to Windows (post-exploitation)</h2>
+<p>Often times on an engagement I find myself needing to copy a tool or a payload from my Kali…</p>
+</section>
+</a>
+<a class="read-next-story prev no-cover" href="https://blog.ropnop.com/abusing-linux-trust-relationships-thotcon-slides/">
+<section class="post">
+<h2>Abusing Linux Trust Relationships - Thotcon Talk</h2>
+<p>Had an awesome time presenting at Thotcon this year. I plan to expand on this topic quite a bit…</p>
+</section>
+</a>
+</aside>
+<footer class="site-footer clearfix">
+<section class="copyright"><a href="https://blog.ropnop.com/">ropnop blog</a> © 2019</section>
+<section class="poweredby">Proudly published with <a href="https://ghost.org/">Ghost</a></section>
+</footer>
+</div>
+<script type="text/javascript" src="./Practical Usage of NTLM Hashes_files/jquery-1.11.3.min.js.download"></script>
+<script type="text/javascript" src="./Practical Usage of NTLM Hashes_files/jquery.fitvids.js.download"></script>
+<script type="text/javascript" src="./Practical Usage of NTLM Hashes_files/index.js.download"></script>
+<script type="text/javascript" src="./Practical Usage of NTLM Hashes_files/prism.js.download"></script>
+<script type="text/javascript" src="./Practical Usage of NTLM Hashes_files/rrssb.min.js.download"></script>
+<script src="./Practical Usage of NTLM Hashes_files/lightbox.js.download"></script>
+<link href="./Practical Usage of NTLM Hashes_files/lightbox.css" rel="stylesheet">
+<script type="text/javascript">
+        jQuery(document).ready(function($) {
+
+            $('.rrssb-buttons').rrssb({
+                // required:
+                title: 'Practical Usage of NTLM Hashes',
+                url: 'https://blog.ropnop.com/practical-usage-of-ntlm-hashes/',
+
+                // optional:
+                 description: 'Practical Usage of NTLM Hashes',
+                // emailBody: 'Usually email body is just the description + url, but you can customize it if you want'
+            });
+
+        });
+    </script>
+<script>
+        // TO ACTIVATE ADD var ga_id = "your_ga_id" to ghost code injection header
+        if (window.ga_id) {
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+            ga('create', window.ga_id, 'auto');
+            ga('require', 'linkid', 'linkid.js');
+            ga('send', 'pageview');
+        }
+    </script>
+<script>
+        if(window.social_link){
+            var url_regexp = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+            $.each(window.social_link,function(type, url){
+                if(typeof url ==="string" && url_regexp.test(url)){
+                    $('<li>').append($('<a>',{
+                                        html: '<i class="fa fa-'+type+'"></i>',
+                                        title: type,
+                                        href: url,
+                                        target: "_blank"
+                                    })
+                                ).appendTo('.social_link');
+
+                }
+            })
+        }
+    </script>
+
+
+<div id="lightboxOverlay" class="lightboxOverlay" style="display: none;"></div><div id="lightbox" class="lightbox" style="display: none;"><div class="lb-outerContainer"><div class="lb-container"><img class="lb-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="><div class="lb-nav"><a class="lb-prev" href="https://blog.ropnop.com/practical-usage-of-ntlm-hashes/"></a><a class="lb-next" href="https://blog.ropnop.com/practical-usage-of-ntlm-hashes/"></a></div><div class="lb-loader"><a class="lb-cancel"></a></div></div></div><div class="lb-dataContainer"><div class="lb-data"><div class="lb-details"><span class="lb-caption"></span><span class="lb-number"></span></div><div class="lb-closeContainer"><a class="lb-close"></a></div></div></div></div><iframe style="display: none;" src="./Practical Usage of NTLM Hashes_files/saved_resource(2).html"></iframe></body></html>

