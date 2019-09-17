@@ -1,0 +1,17 @@
+systeminfo
+hostname
+echo %username%
+echo %userdomain%
+net users
+net user [user_name]
+ipconfig /all
+route print
+arp -A
+netstat -ano
+netsh firewall show state
+netsh firewall show config
+schtasks /query /fo LIST /v
+tasklist /SVC
+net start
+DRIVERQUERY
+
