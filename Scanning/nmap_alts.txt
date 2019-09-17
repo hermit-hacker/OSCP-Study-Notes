@@ -1,0 +1,5 @@
+Run vuln enumerations:
+nmap -sS -sV -O -A --script="*-vuln-*" -oA FILE_PREFIX HOST
+
+Run top 25 UDP ports:
+nmap -sU --top-ports 25 --open -oA UDP_FILE_PREFIX HOST
